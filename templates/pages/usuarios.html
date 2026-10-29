@@ -1,0 +1,31 @@
+{{define "content"}}
+<section class="wrap">
+  <p class="eyebrow"><a href="/moderacao">Moderação</a></p>
+  <h1>Usuários</h1>
+  <p class="muted">Moderadores aprovam eventos e cadastram espaços. Verificados publicam sem passar pela fila (o selo também vem sozinho depois de 3 eventos aprovados).</p>
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Nome</th><th>E-mail</th><th>Acesso</th></tr></thead>
+      <tbody>
+      {{range .Data}}
+        <tr>
+          <td>{{if .Slug}}<a href="/artista/{{.Slug}}">{{.Name}}</a>{{else}}<span class="muted">sem perfil</span>{{end}}</td>
+          <td>{{.Email}}</td>
+          <td>
+            <form method="post" action="/admin/usuarios/{{.ID}}" class="inline-form">
+              <select name="role" aria-label="Papel">
+                <option value="membro" {{if eq .Role "membro"}}selected{{end}}>Membro</option>
+                <option value="moderador" {{if eq .Role "moderador"}}selected{{end}}>Moderador</option>
+                <option value="admin" {{if eq .Role "admin"}}selected{{end}}>Admin</option>
+              </select>
+              <label class="check"><input type="checkbox" name="verified" value="1" {{if .Verified}}checked{{end}}> verificado</label>
+              <button class="btn btn-ghost" type="submit">Salvar</button>
+            </form>
+          </td>
+        </tr>
+      {{end}}
+      </tbody>
+    </table>
+  </div>
+</section>
+{{end}}

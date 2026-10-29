@@ -1,0 +1,25 @@
+{{define "content"}}
+{{$d := .Data}}
+<section class="narrow">
+  {{if $d.Sent}}
+    <h1>Confira seu e-mail</h1>
+    <p>Mandamos um link de acesso para <b>{{$d.Email}}</b>. Ele vale por 20 minutos.</p>
+    <p class="muted">Não chegou? Olhe a caixa de spam ou <a href="/entrar">peça de novo</a>.</p>
+    {{with $d.DevLink}}<p class="devbox">Modo desenvolvimento, link direto: <a href="{{.}}">{{.}}</a></p>{{end}}
+  {{else}}
+    <h1>Entrar no TeatNet</h1>
+    <p>Para artistas, grupos e espaços que querem divulgar. Sem senha: você recebe um link por e-mail.</p>
+    {{with $d.Error}}<p class="error" role="alert">{{.}}</p>{{end}}
+    <form method="post" action="/entrar" class="form">
+      <input type="hidden" name="volta" value="{{$d.Volta}}">
+      <label class="field">
+        <span>Seu e-mail</span>
+        <input type="email" name="email" value="{{$d.Email}}" required autocomplete="email" inputmode="email" autofocus>
+      </label>
+      {{template "turnstile" .TurnstileSite}}
+      <button class="btn btn-primary btn-block" type="submit">Receber link de acesso</button>
+    </form>
+    <p class="muted small">Só quer avisar de um evento? <a href="/eventos/novo">Sugira sem criar conta</a>.</p>
+  {{end}}
+</section>
+{{end}}

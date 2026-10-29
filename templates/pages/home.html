@@ -1,0 +1,51 @@
+{{define "head"}}{{template "leaflet"}}{{end}}
+{{define "bodyclass"}}page-home{{end}}
+{{/* define vazio não substitui o bloco do layout, por isso o span */}}
+{{define "footer"}}<span hidden></span>{{end}}
+
+{{define "content"}}
+{{$d := .Data}}
+<div class="explore">
+  <div id="map" class="map" data-lat="{{$d.CenterLat}}" data-lng="{{$d.CenterLng}}" data-cards="{{json $d.Cards}}" aria-label="Mapa de eventos"></div>
+
+  <section class="panel" aria-label="Lista de eventos">
+    <div class="panel-head">
+      <p class="kicker">Agenda cultural colaborativa</p>
+      <h1>O que tem pra ver em <em>Rio Preto</em></h1>
+      <p class="count" id="count">{{len $d.Cards}} {{if eq (len $d.Cards) 1}}evento{{else}}eventos{{end}} no mapa</p>
+
+      <form class="filters" id="filters" action="/" method="get">
+        <div class="seg" role="radiogroup" aria-label="Quando">
+          <label><input type="radio" name="periodo" value="" {{if eq $d.Period ""}}checked{{end}}><span>Próximos</span></label>
+          <label><input type="radio" name="periodo" value="hoje" {{if eq $d.Period "hoje"}}checked{{end}}><span>Hoje</span></label>
+          <label><input type="radio" name="periodo" value="fds" {{if eq $d.Period "fds"}}checked{{end}}><span>Fim de semana</span></label>
+          <label><input type="radio" name="periodo" value="semana" {{if eq $d.Period "semana"}}checked{{end}}><span>7 dias</span></label>
+        </div>
+        <div class="cats" role="radiogroup" aria-label="Tipo de arte">
+          <label class="cat"><input type="radio" name="categoria" value="" {{if eq $d.Category ""}}checked{{end}}><span>Tudo</span></label>
+          {{range categories}}<label class="cat cat-{{.Value}}"><input type="radio" name="categoria" value="{{.Value}}" {{if eq $d.Category .Value}}checked{{end}}><span><i></i>{{.Label}}</span></label>{{end}}
+        </div>
+        <label class="switch"><input type="checkbox" name="gratis" value="1" {{if $d.FreeOnly}}checked{{end}}><span class="switch-track"></span> Só gratuitos</label>
+        <noscript><button class="btn" type="submit">Filtrar</button></noscript>
+      </form>
+    </div>
+
+    <div class="panel-list" id="list">
+      {{if $d.Cards}}
+        <div class="tickets">{{range $d.Cards}}{{template "card" .}}{{end}}</div>
+      {{else}}
+        <div class="empty">
+          <p>Nenhum evento nesse filtro.</p>
+          <p><a href="/eventos/novo">Conhece algum? Divulgue aqui.</a></p>
+        </div>
+      {{end}}
+      <a class="panel-cta" href="/eventos/novo">
+        <b>Sabe de algum evento que não está aqui?</b>
+        <span>Divulgue em 2 minutos, com ou sem conta →</span>
+      </a>
+    </div>
+  </section>
+</div>
+{{end}}
+
+{{define "scripts"}}<script src="/static/map.js?v={{.Version}}" defer></script>{{end}}

@@ -1,0 +1,50 @@
+{{define "content"}}
+{{$m := .Data.M}}
+<section class="wrap">
+  <p class="eyebrow"><a href="/moderacao">Moderação</a></p>
+  <h1>Métricas</h1>
+  <p class="muted">Números para acompanhar o uso e para apresentar à Secretaria de Cultura.</p>
+
+  <h2>Agora</h2>
+  <div class="stats">
+    <div class="stat"><b>{{$m.Upcoming}}</b><span>eventos futuros no mapa</span></div>
+    <div class="stat"><b>{{$m.Published}}</b><span>eventos publicados no total</span></div>
+    <div class="stat"><b>{{$m.Artists}}</b><span>artistas e grupos com evento</span></div>
+    <div class="stat"><b>{{$m.Venues}}</b><span>espaços cadastrados</span></div>
+    <div class="stat"><b>{{$m.Users}}</b><span>contas criadas</span></div>
+    <div class="stat"><b>{{$m.Pending}}</b><span>esperando moderação</span></div>
+  </div>
+
+  <h2>Últimos 30 dias</h2>
+  <div class="stats">
+    <div class="stat"><b>{{index $m.Last30 "visita_mapa"}}</b><span>visitas ao mapa</span></div>
+    <div class="stat"><b>{{index $m.Last30 "visita_evento"}}</b><span>visitas a eventos</span></div>
+    <div class="stat"><b>{{index $m.Last30 "como_chegar"}}</b><span>pedidos de rota</span></div>
+    <div class="stat"><b>{{index $m.Last30 "compartilhar_whatsapp"}}</b><span>compartilhamentos no WhatsApp</span></div>
+    <div class="stat"><b>{{index $m.Last30 "adicionar_agenda"}}</b><span>adicionados à agenda</span></div>
+    <div class="stat"><b>{{index $m.Last30 "evento_enviado"}}</b><span>eventos enviados</span></div>
+  </div>
+
+  <div class="two-col">
+    <div>
+      <h2>Por categoria</h2>
+      {{if $m.ByCategory}}
+      <table class="table"><tbody>
+        {{range $m.ByCategory}}<tr><td>{{.Label}}</td><td class="num">{{.Count}}</td></tr>{{end}}
+      </tbody></table>
+      {{else}}<p class="empty">Sem dados ainda.</p>{{end}}
+    </div>
+    <div>
+      <h2>Mais vistos</h2>
+      {{if .Data.Top}}
+      <table class="table">
+        <thead><tr><th>Evento</th><th class="num">Visitas</th><th class="num">Rotas</th></tr></thead>
+        <tbody>
+        {{range .Data.Top}}<tr><td><a href="/evento/{{.Slug}}">{{.Title}}</a></td><td class="num">{{.Views}}</td><td class="num">{{.Directions}}</td></tr>{{end}}
+        </tbody>
+      </table>
+      {{else}}<p class="empty">Sem dados ainda.</p>{{end}}
+    </div>
+  </div>
+</section>
+{{end}}

@@ -1,0 +1,6 @@
+teatnet.tainodev.com.br {
+	# certificado de origem da Cloudflare, o mesmo da tainodev (cobre *.tainodev.com.br)
+	tls /etc/caddy/certs/tainodev.pem /etc/caddy/certs/tainodev.key
+	encode zstd gzip
+	reverse_proxy 127.0.0.1:8091
+}

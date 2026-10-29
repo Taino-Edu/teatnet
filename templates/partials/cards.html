@@ -1,0 +1,52 @@
+{{define "card"}}
+<a class="ticket cat-{{.Category}}" href="/evento/{{.Slug}}" data-id="{{.ID}}">
+  <span class="ticket-stub">
+    <span class="ticket-wd">{{.Weekday}}</span>
+    <span class="ticket-day">{{.DayNum}}</span>
+    <span class="ticket-mo">{{.Month}}</span>
+  </span>
+  <span class="ticket-body">
+    <span class="cat-label">{{.CatLabel}}</span>
+    <span class="ticket-title">{{.Title}}</span>
+    <span class="ticket-place">{{.Place}}</span>
+    <span class="ticket-meta">
+      <span class="ticket-time">{{.Time}}</span>
+      {{if .Free}}<span class="ticket-free">Gratuito</span>{{else}}<span class="ticket-price">{{.Price}}</span>{{end}}
+      {{if gt .Sessions 1}}<span class="ticket-more">+{{.Sessions}} sessões</span>{{end}}
+    </span>
+  </span>
+</a>
+{{end}}
+
+{{define "card-list"}}
+{{if .}}
+  <div class="tickets">{{range .}}{{template "card" .}}{{end}}</div>
+{{else}}
+  <p class="empty">Nenhum evento futuro por aqui ainda.</p>
+{{end}}
+{{end}}
+
+{{define "status"}}
+{{if eq . "publicado"}}<span class="status status-ok">Publicado</span>
+{{else if eq . "pendente"}}<span class="status status-wait">Em moderação</span>
+{{else}}<span class="status status-no">Recusado</span>{{end}}
+{{end}}
+
+{{define "access-checks"}}
+<div class="checks">
+  {{$cur := .}}
+  {{range accessOptions}}
+  <label class="check"><input type="checkbox" name="access" value="{{.Value}}" {{if has $cur .Value}}checked{{end}}> {{.Label}}</label>
+  {{end}}
+</div>
+{{end}}
+
+{{define "turnstile"}}
+{{if .}}<div class="cf-turnstile" data-sitekey="{{.}}" data-language="pt-br"></div>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>{{end}}
+{{end}}
+
+{{define "leaflet"}}
+<link rel="stylesheet" href="/static/vendor/leaflet/leaflet.css">
+<script src="/static/vendor/leaflet/leaflet.js" defer></script>
+{{end}}

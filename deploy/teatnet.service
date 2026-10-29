@@ -1,0 +1,19 @@
+[Unit]
+Description=TeatNet - agenda cultural de Rio Preto
+After=network.target
+
+[Service]
+User=teatnet
+WorkingDirectory=/opt/teatnet
+ExecStart=/opt/teatnet/teatnet
+EnvironmentFile=/opt/teatnet/teatnet.env
+Restart=always
+RestartSec=2
+# limites para não disputar a VPS de 2 núcleos com o resto
+MemoryMax=300M
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/opt/teatnet/data
+
+[Install]
+WantedBy=multi-user.target

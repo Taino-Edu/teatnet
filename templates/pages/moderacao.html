@@ -1,0 +1,49 @@
+{{define "content"}}
+<section class="wrap">
+  <header class="dash-head">
+    <div>
+      <p class="eyebrow">Moderação</p>
+      <h1>Fila de aprovação</h1>
+      <p class="links"><a href="/moderacao/espacos">Espaços</a> · <a href="/moderacao/metricas">Métricas</a>{{if .User.IsAdmin}} · <a href="/admin/usuarios">Usuários</a>{{end}}</p>
+    </div>
+  </header>
+  {{if .Data}}
+  <div class="mod-list">
+    {{range .Data}}{{template "mod-card" .}}{{end}}
+  </div>
+  {{else}}
+  <p class="empty">Nada esperando aprovação. 🎭</p>
+  {{end}}
+</section>
+{{end}}
+
+{{define "mod-card"}}
+<article class="mod-card" id="mod-{{.ID}}">
+  {{if .Poster}}<img class="mod-poster" src="{{.Poster}}" alt="">{{end}}
+  <div class="mod-body">
+    <span class="chip chip-{{.Category}}">{{category .Category}}</span>
+    <h3><a href="/evento/{{.Slug}}" target="_blank">{{.Title}}</a></h3>
+    <p class="muted">{{rangeOf .First .Last}}{{if gt .SessionCount 1}} · {{.SessionCount}} sessões{{end}} · {{.PlaceName}}</p>
+    {{with .Description}}<p>{{excerpt . 220}}</p>{{end}}
+    <p class="small">
+      {{if .AuthorName}}Enviado por <a href="/artista/{{.AuthorSlug}}" target="_blank">{{.AuthorName}}</a>{{if .AuthorVerified}} ✓{{end}}
+      {{else}}Sugestão de <b>{{.SuggestedName}}</b> ({{.SuggestedEmail}}){{end}}
+      {{with .SourceURL}} · <a href="{{.}}" target="_blank" rel="noopener nofollow">fonte</a>{{else}} · <span class="warn">sem fonte</span>{{end}}
+    </p>
+    <div class="mod-actions">
+      <button class="btn btn-primary" hx-post="/moderacao/eventos/{{.ID}}/aprovar" hx-target="#mod-{{.ID}}" hx-swap="outerHTML">Aprovar</button>
+      <a class="btn" href="/eventos/{{.ID}}/editar">Editar</a>
+      <form class="reject" hx-post="/moderacao/eventos/{{.ID}}/recusar" hx-target="#mod-{{.ID}}" hx-swap="outerHTML" method="post" action="/moderacao/eventos/{{.ID}}/recusar">
+        <input name="note" placeholder="Motivo (o autor vê)" maxlength="500">
+        <button class="btn btn-ghost" type="submit">Recusar</button>
+      </form>
+    </div>
+  </div>
+</article>
+{{end}}
+
+{{define "mod-done"}}
+<article class="mod-card mod-card-done" id="mod-{{.Event.ID}}">
+  <p><b>{{.Event.Title}}</b> — {{.Message}}</p>
+</article>
+{{end}}

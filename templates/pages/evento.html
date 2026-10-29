@@ -1,0 +1,86 @@
+{{define "head"}}{{template "leaflet"}}{{end}}
+
+{{define "content"}}
+{{$e := .Data.Event}}
+<header class="hero cat-{{$e.Category}}">
+  <div class="hero-inner">
+    <a class="back" href="/">← Voltar ao mapa</a>
+    <span class="cat-label">{{category $e.Category}}</span>
+    <h1 class="hero-title">{{$e.Title}}</h1>
+    <p class="hero-place">
+      {{if $e.VenueSlug}}<a href="/espaco/{{$e.VenueSlug}}">{{$e.PlaceName}}</a>{{else}}{{$e.PlaceName}}{{end}}
+    </p>
+    {{with .Data.Upcoming}}
+    <p class="hero-when">
+      <span class="hero-date">{{day (index . 0)}}</span>
+      <span class="hero-time">{{time (index . 0)}}</span>
+      {{if gt (len .) 1}}<span class="hero-more">e mais {{len (slice . 1)}} {{if eq (len .) 2}}sessão{{else}}sessões{{end}}</span>{{end}}
+    </p>
+    {{end}}
+  </div>
+</header>
+
+<article class="event wrap">
+  {{if ne $e.Status "publicado"}}
+  <div class="notice">
+    {{template "status" $e.Status}}
+    {{if eq $e.Status "pendente"}}Este evento ainda não aparece no mapa: está esperando a moderação.{{end}}
+    {{if eq $e.Status "recusado"}}Este evento foi recusado pela moderação.{{with $e.ReviewNote}} Motivo: {{.}}{{end}}{{end}}
+  </div>
+  {{end}}
+
+  <div class="event-grid">
+    <div class="event-main">
+      <div class="actions">
+        {{with $e.TicketURL}}<a class="btn btn-primary" href="{{.}}" target="_blank" rel="noopener">{{if eq $e.PriceType "gratuito"}}Reservar ingresso{{else}}Comprar ingresso{{end}}</a>{{end}}
+        <a class="btn" href="/evento/{{$e.Slug}}/rota" target="_blank" rel="noopener">Como chegar</a>
+        {{if .Data.Upcoming}}<a class="btn" href="/evento/{{$e.Slug}}/agenda.ics">Adicionar à agenda</a>{{end}}
+        <a class="btn btn-whats" href="/evento/{{$e.Slug}}/whatsapp" target="_blank" rel="noopener">WhatsApp</a>
+        {{if .Data.CanEdit}}<a class="btn btn-ghost" href="/eventos/{{$e.ID}}/editar">Editar</a>{{end}}
+      </div>
+
+      <div class="facts">
+        <div class="fact"><span>Entrada</span><b>{{price $e.PriceType $e.PriceInfo}}</b></div>
+        <div class="fact"><span>Classificação</span><b>{{age $e.AgeRating}}</b></div>
+        {{with access $e.Accessibility}}<div class="fact"><span>Acessibilidade</span><b>{{range $i, $a := .}}{{if $i}}, {{end}}{{$a}}{{end}}</b></div>{{end}}
+      </div>
+
+      {{with $e.Description}}
+      <section class="about">
+        <h2>Sobre</h2>
+        {{range paragraphs .}}<p>{{.}}</p>{{end}}
+      </section>
+      {{end}}
+
+      <section class="sessions">
+        <h2>{{if gt (len .Data.Upcoming) 1}}Sessões{{else}}Quando{{end}}</h2>
+        {{if .Data.Upcoming}}
+        <ul class="session-list">
+          {{range .Data.Upcoming}}<li><span>{{day .}}</span><b>{{time .}}</b></li>{{end}}
+        </ul>
+        {{else}}
+        <p class="muted">Todas as sessões já aconteceram.</p>
+        {{end}}
+      </section>
+
+      <p class="credits">
+        {{if $e.AuthorSlug}}Divulgado por <a href="/artista/{{$e.AuthorSlug}}">{{$e.AuthorName}}</a>.{{end}}
+        {{with $e.SourceURL}}Informações conferidas em <a href="{{.}}" target="_blank" rel="noopener nofollow">{{.}}</a>{{end}}
+      </p>
+    </div>
+
+    <aside class="event-side">
+      {{with $e.Poster}}<img class="poster" src="{{.}}" alt="Cartaz de {{$e.Title}}">{{end}}
+      <div class="place-card">
+        <div id="minimap" class="minimap" data-lat="{{$e.Lat}}" data-lng="{{$e.Lng}}" data-category="{{$e.Category}}" aria-label="Local no mapa"></div>
+        <div class="place-info">
+          <b>{{if $e.VenueSlug}}<a href="/espaco/{{$e.VenueSlug}}">{{$e.PlaceName}}</a>{{else}}{{$e.PlaceName}}{{end}}</b>
+          {{with $e.Address}}<span>{{.}}</span>{{end}}
+        </div>
+      </div>
+    </aside>
+  </div>
+</article>
+{{end}}
+
+{{define "scripts"}}<script src="/static/minimap.js?v={{.Version}}" defer></script>{{end}}

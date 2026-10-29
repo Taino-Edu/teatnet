@@ -1,0 +1,180 @@
+{{define "head"}}{{template "leaflet"}}{{end}}
+
+{{define "content"}}
+{{$f := .Data.Form}}
+{{$err := $f.Errors}}
+<section class="wrap form-page">
+  <h1>{{.Title}}</h1>
+  {{if not .User}}
+  <p class="lead">Viu um cartaz, um post ou sabe de uma apresentação? Conte pra gente. A moderação confere antes de publicar.
+    É artista ou produtor? <a href="/entrar?volta=/eventos/novo">Entre</a> para ter sua página e acompanhar seus eventos.</p>
+  {{else if not .User.Trusted}}
+  <p class="lead">Seus primeiros eventos passam pela moderação. Depois de 3 aprovados você ganha o selo de verificado e publica direto.</p>
+  {{end}}
+  {{with $err.form}}<p class="error" role="alert">{{.}}</p>{{end}}
+  {{if $err}}<p class="error" role="alert">Confira os campos marcados abaixo.</p>{{end}}
+
+  <form method="post" enctype="multipart/form-data" class="form" id="event-form"
+        action="{{if $f.ID}}/eventos/{{$f.ID}}/editar{{else}}/eventos/novo{{end}}">
+
+    <fieldset>
+      <legend>O evento</legend>
+      <label class="field {{if $err.title}}invalid{{end}}">
+        <span>Título</span>
+        <input name="title" value="{{$f.Title}}" required maxlength="120" placeholder="Ex.: Auto da Compadecida">
+        {{with $err.title}}<small class="field-error">{{.}}</small>{{end}}
+      </label>
+      <label class="field {{if $err.category}}invalid{{end}}">
+        <span>Categoria</span>
+        <select name="category" required>
+          <option value="">Escolha…</option>
+          {{range categories}}<option value="{{.Value}}" {{if eq $f.Category .Value}}selected{{end}}>{{.Label}}</option>{{end}}
+        </select>
+        {{with $err.category}}<small class="field-error">{{.}}</small>{{end}}
+      </label>
+      <label class="field {{if $err.description}}invalid{{end}}">
+        <span>Descrição <em>(opcional)</em></span>
+        <textarea name="description" rows="5" maxlength="3000" placeholder="Sinopse, elenco, direção, duração…">{{$f.Description}}</textarea>
+        {{with $err.description}}<small class="field-error">{{.}}</small>{{end}}
+      </label>
+      <label class="field {{if $err.poster}}invalid{{end}}">
+        <span>Cartaz <em>(opcional, JPG/PNG/WebP até 8 MB)</em></span>
+        {{with $f.Poster}}<img class="thumb" src="{{.}}" alt="Cartaz atual">{{end}}
+        <input type="file" name="poster" accept="image/jpeg,image/png,image/webp">
+        {{with $err.poster}}<small class="field-error">{{.}}</small>{{end}}
+      </label>
+    </fieldset>
+
+    <fieldset class="{{if $err.sessions}}invalid{{end}}">
+      <legend>Datas e horários</legend>
+      <p class="hint">Peça em temporada? Use “Gerar temporada” em vez de adicionar uma por uma.</p>
+      <div id="sessions" class="session-rows">
+        {{range $f.Sessions}}
+        <div class="session-row">
+          <input type="date" name="s_date" value="{{.Date}}" aria-label="Data">
+          <input type="time" name="s_time" value="{{.Time}}" aria-label="Horário">
+          <button type="button" class="btn btn-ghost btn-icon" data-remove-session aria-label="Remover sessão">×</button>
+        </div>
+        {{end}}
+      </div>
+      <div class="row-actions">
+        <button type="button" class="btn" id="add-session">+ Adicionar data</button>
+        <button type="button" class="btn btn-ghost" id="toggle-season">Gerar temporada…</button>
+      </div>
+      <div class="season" id="season" hidden>
+        <div class="season-grid">
+          <label class="field"><span>De</span><input type="date" id="season-from"></label>
+          <label class="field"><span>Até</span><input type="date" id="season-to"></label>
+          <label class="field"><span>Horário</span><input type="time" id="season-time" value="20:00"></label>
+        </div>
+        <div class="weekdays" role="group" aria-label="Dias da semana">
+          <label><input type="checkbox" value="0"><span>dom</span></label>
+          <label><input type="checkbox" value="1"><span>seg</span></label>
+          <label><input type="checkbox" value="2"><span>ter</span></label>
+          <label><input type="checkbox" value="3"><span>qua</span></label>
+          <label><input type="checkbox" value="4"><span>qui</span></label>
+          <label><input type="checkbox" value="5" checked><span>sex</span></label>
+          <label><input type="checkbox" value="6" checked><span>sáb</span></label>
+        </div>
+        <button type="button" class="btn btn-primary" id="season-apply">Adicionar sessões</button>
+      </div>
+      {{with $err.sessions}}<small class="field-error">{{.}}</small>{{end}}
+    </fieldset>
+
+    <fieldset class="{{if $err.venue}}invalid{{end}}">
+      <legend>Onde</legend>
+      <label class="field">
+        <span>Espaço</span>
+        <select name="venue_id" id="venue">
+          <option value="">Outro local (marcar no mapa)</option>
+          {{range .Data.Venues}}<option value="{{.ID}}" data-lat="{{.Lat}}" data-lng="{{.Lng}}" {{if eq $f.VenueID (printf "%d" .ID)}}selected{{end}}>{{.Name}}</option>{{end}}
+        </select>
+      </label>
+      <div id="custom-place">
+        <label class="field">
+          <span>Nome do local</span>
+          <input name="place_name" value="{{$f.PlaceName}}" maxlength="120" placeholder="Ex.: Praça Rui Barbosa">
+        </label>
+        <label class="field">
+          <span>Endereço</span>
+          <div class="input-group">
+            <input name="address" id="address" value="{{$f.Address}}" maxlength="200" placeholder="Rua, número, bairro">
+            <button type="button" class="btn" id="geocode">Buscar no mapa</button>
+          </div>
+        </label>
+        <ul id="geo-results" class="geo-results" hidden></ul>
+        <p class="hint">Ou clique no mapa para marcar o ponto. Dá para arrastar o pino.</p>
+      </div>
+      <input type="hidden" name="lat" id="lat" value="{{$f.Lat}}">
+      <input type="hidden" name="lng" id="lng" value="{{$f.Lng}}">
+      <div id="picker" class="picker" data-lat="{{.Data.CenterLat}}" data-lng="{{.Data.CenterLng}}"></div>
+      {{with $err.venue}}<small class="field-error">{{.}}</small>{{end}}
+    </fieldset>
+
+    <fieldset>
+      <legend>Ingresso e acesso</legend>
+      <div class="radios">
+        {{range priceTypes}}<label class="check"><input type="radio" name="price_type" value="{{.Value}}" {{if eq $f.PriceType .Value}}checked{{end}}> {{.Label}}</label>{{end}}
+      </div>
+      <label class="field {{if $err.price_info}}invalid{{end}}">
+        <span>Valores <em>(opcional)</em></span>
+        <input name="price_info" value="{{$f.PriceInfo}}" maxlength="120" placeholder="Ex.: R$ 40 inteira · R$ 20 meia">
+        {{with $err.price_info}}<small class="field-error">{{.}}</small>{{end}}
+      </label>
+      <label class="field {{if $err.ticket_url}}invalid{{end}}">
+        <span>Link para ingresso ou reserva <em>(opcional)</em></span>
+        <input type="url" name="ticket_url" value="{{$f.TicketURL}}" placeholder="https://">
+        {{with $err.ticket_url}}<small class="field-error">{{.}}</small>{{end}}
+      </label>
+      <label class="field">
+        <span>Classificação indicativa</span>
+        <select name="age_rating">
+          {{range ageRatings}}<option value="{{.Value}}" {{if eq $f.AgeRating .Value}}selected{{end}}>{{.Label}}</option>{{end}}
+        </select>
+      </label>
+      <div class="field"><span>Acessibilidade</span>{{template "access-checks" $f.Access}}</div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Fonte</legend>
+      <label class="field {{if $err.source_url}}invalid{{end}}">
+        <span>Onde a informação foi publicada <em>(opcional)</em></span>
+        <input type="url" name="source_url" value="{{$f.SourceURL}}" placeholder="Link do post, site do teatro…">
+        {{with $err.source_url}}<small class="field-error">{{.}}</small>{{end}}
+      </label>
+    </fieldset>
+
+    {{if not .User}}
+    <fieldset>
+      <legend>Seu contato</legend>
+      <p class="hint">Só a moderação vê, caso precise confirmar algo.</p>
+      <label class="field {{if $err.name}}invalid{{end}}">
+        <span>Nome</span>
+        <input name="name" value="{{$f.Name}}" maxlength="80" autocomplete="name">
+        {{with $err.name}}<small class="field-error">{{.}}</small>{{end}}
+      </label>
+      <label class="field {{if $err.email}}invalid{{end}}">
+        <span>E-mail</span>
+        <input type="email" name="email" value="{{$f.Email}}" autocomplete="email">
+        {{with $err.email}}<small class="field-error">{{.}}</small>{{end}}
+      </label>
+      {{template "turnstile" .TurnstileSite}}
+    </fieldset>
+    {{end}}
+
+    <div class="form-submit">
+      <button class="btn btn-primary btn-lg" type="submit">{{if $f.ID}}Salvar alterações{{else if and .User .User.Trusted}}Publicar evento{{else}}Enviar para moderação{{end}}</button>
+    </div>
+  </form>
+</section>
+
+<template id="session-template">
+  <div class="session-row">
+    <input type="date" name="s_date" aria-label="Data">
+    <input type="time" name="s_time" aria-label="Horário">
+    <button type="button" class="btn btn-ghost btn-icon" data-remove-session aria-label="Remover sessão">×</button>
+  </div>
+</template>
+{{end}}
+
+{{define "scripts"}}<script src="/static/form.js?v={{.Version}}" defer></script>{{end}}

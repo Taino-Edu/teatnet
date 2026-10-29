@@ -1,0 +1,48 @@
+{{define "head"}}{{template "leaflet"}}{{end}}
+
+{{define "content"}}
+{{$v := .Data.Venue}}
+{{$err := .Data.Errors}}
+<section class="wrap form-page">
+  <p class="eyebrow"><a href="/moderacao/espacos">Espaços</a></p>
+  <h1>{{.Title}}</h1>
+  <form method="post" class="form" action="{{if $v.ID}}/moderacao/espacos/{{$v.ID}}{{else}}/moderacao/espacos/novo{{end}}">
+    <fieldset>
+      <label class="field {{if $err.name}}invalid{{end}}">
+        <span>Nome</span>
+        <input name="name" value="{{$v.Name}}" required maxlength="120">
+        {{with $err.name}}<small class="field-error">{{.}}</small>{{end}}
+      </label>
+      <label class="field">
+        <span>Endereço</span>
+        <div class="input-group">
+          <input name="address" id="address" value="{{$v.Address}}" maxlength="200">
+          <button type="button" class="btn" id="geocode">Buscar no mapa</button>
+        </div>
+      </label>
+      <ul id="geo-results" class="geo-results" hidden></ul>
+      <label class="field">
+        <span>Bairro</span>
+        <input name="neighborhood" value="{{$v.Neighborhood}}" maxlength="80">
+      </label>
+      <label class="field {{if $err.website}}invalid{{end}}">
+        <span>Site</span>
+        <input type="url" name="website" value="{{$v.Website}}" placeholder="https://">
+        {{with $err.website}}<small class="field-error">{{.}}</small>{{end}}
+      </label>
+      <div class="field"><span>Acessibilidade</span>{{template "access-checks" $v.Accessibility}}</div>
+    </fieldset>
+    <fieldset class="{{if $err.venue}}invalid{{end}}">
+      <legend>Localização</legend>
+      <p class="hint">Clique no mapa ou arraste o pino até a entrada do espaço.</p>
+      <input type="hidden" name="lat" id="lat" value="{{if $v.ID}}{{$v.Lat}}{{end}}">
+      <input type="hidden" name="lng" id="lng" value="{{if $v.ID}}{{$v.Lng}}{{end}}">
+      <div id="picker" class="picker" data-lat="{{$v.Lat}}" data-lng="{{$v.Lng}}"></div>
+      {{with $err.venue}}<small class="field-error">{{.}}</small>{{end}}
+    </fieldset>
+    <div class="form-submit"><button class="btn btn-primary btn-lg" type="submit">Salvar espaço</button></div>
+  </form>
+</section>
+{{end}}
+
+{{define "scripts"}}<script src="/static/form.js?v={{.Version}}" defer></script>{{end}}

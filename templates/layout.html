@@ -1,0 +1,50 @@
+{{define "layout"}}<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{if .Title}}{{.Title}} · {{end}}TeatNet Rio Preto</title>
+<meta name="description" content="{{.Description}}">
+<meta property="og:site_name" content="TeatNet">
+<meta property="og:title" content="{{if .Title}}{{.Title}}{{else}}TeatNet · cultura em Rio Preto{{end}}">
+<meta property="og:description" content="{{.Description}}">
+<meta property="og:type" content="website">
+{{with .OGImage}}<meta property="og:image" content="{{.}}">{{end}}
+{{with .Canonical}}<link rel="canonical" href="{{.}}">{{end}}
+<meta name="theme-color" content="#15100e">
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,800;1,9..144,600&family=Instrument+Sans:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="/static/app.css?v={{.Version}}">
+{{block "head" .}}{{end}}
+</head>
+<body class="{{block "bodyclass" .}}{{end}}">
+<header class="topbar">
+  <a class="brand" href="/" aria-label="TeatNet, página inicial">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><path d="M2 3h28v3.5c-5 0-7.5 3.5-7.5 9.5s2.5 9.5 7.5 9.5V29H2v-3.5c5 0 7.5-3.5 7.5-9.5S7 6.5 2 6.5z" fill="var(--curtain)"/><circle cx="16" cy="16" r="3.4" fill="var(--gold)"/></svg>
+    <span class="brand-name">Teat<b>Net</b></span>
+    <small>Rio Preto</small>
+  </a>
+  <nav class="topnav">
+    <a class="btn btn-gold" href="/eventos/novo">+ Divulgar</a>
+    {{with .User}}
+      {{if .IsMod}}<a class="navlink navlink-wide" href="/moderacao">Moderação</a>{{end}}
+      <a class="navlink" href="/painel">Painel</a>
+    {{else}}
+      <a class="navlink" href="/entrar">Entrar</a>
+    {{end}}
+  </nav>
+</header>
+{{with .Flash}}<div class="flash" role="status">{{.}}</div>{{end}}
+<main>{{template "content" .}}</main>
+{{block "footer" .}}
+<footer class="footer">
+  <p><b>TeatNet</b> · agenda colaborativa de cultura de São José do Rio Preto.</p>
+  <p>Mapa © <a href="https://www.openstreetmap.org/copyright">colaboradores do OpenStreetMap</a></p>
+</footer>
+{{end}}
+<script src="/static/vendor/htmx.min.js" defer></script>
+{{block "scripts" .}}{{end}}
+</body>
+</html>{{end}}

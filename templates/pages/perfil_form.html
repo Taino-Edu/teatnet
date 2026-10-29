@@ -1,0 +1,44 @@
+{{define "content"}}
+{{$p := .Data.Profile}}
+{{$err := .Data.Errors}}
+<section class="narrow">
+  <h1>Meu perfil</h1>
+  <p class="muted">Essas informações aparecem na sua página pública. Seu e-mail ({{$p.Email}}) nunca é exibido.</p>
+  <form method="post" action="/painel/perfil" enctype="multipart/form-data" class="form">
+    <label class="field {{if $err.name}}invalid{{end}}">
+      <span>Nome artístico ou do grupo</span>
+      <input name="name" value="{{$p.Name}}" required maxlength="80">
+      {{with $err.name}}<small class="field-error">{{.}}</small>{{end}}
+    </label>
+    <div class="field">
+      <span>Você é</span>
+      <div class="radios">
+        <label class="check"><input type="radio" name="kind" value="artista" {{if ne $p.Kind "espaco"}}checked{{end}}> Artista ou grupo</label>
+        <label class="check"><input type="radio" name="kind" value="espaco" {{if eq $p.Kind "espaco"}}checked{{end}}> Espaço cultural / produtora</label>
+      </div>
+    </div>
+    <label class="field {{if $err.bio}}invalid{{end}}">
+      <span>Sobre <em>(opcional)</em></span>
+      <textarea name="bio" rows="5" maxlength="1500" placeholder="Trajetória, linguagem, trabalhos…">{{$p.Bio}}</textarea>
+      {{with $err.bio}}<small class="field-error">{{.}}</small>{{end}}
+    </label>
+    <label class="field {{if $err.instagram}}invalid{{end}}">
+      <span>Instagram <em>(opcional)</em></span>
+      <input name="instagram" value="{{$p.Instagram}}" maxlength="40" placeholder="@seugrupo">
+      {{with $err.instagram}}<small class="field-error">{{.}}</small>{{end}}
+    </label>
+    <label class="field {{if $err.website}}invalid{{end}}">
+      <span>Site <em>(opcional)</em></span>
+      <input type="url" name="website" value="{{$p.Website}}" placeholder="https://">
+      {{with $err.website}}<small class="field-error">{{.}}</small>{{end}}
+    </label>
+    <label class="field {{if $err.avatar}}invalid{{end}}">
+      <span>Foto ou logo <em>(opcional)</em></span>
+      {{with $p.Avatar}}<img class="avatar avatar-sm" src="{{.}}" alt="">{{end}}
+      <input type="file" name="avatar" accept="image/jpeg,image/png,image/webp">
+      {{with $err.avatar}}<small class="field-error">{{.}}</small>{{end}}
+    </label>
+    <button class="btn btn-primary btn-block" type="submit">Salvar perfil</button>
+  </form>
+</section>
+{{end}}

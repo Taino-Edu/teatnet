@@ -1,0 +1,10 @@
+{{define "content"}}
+<section class="narrow">
+  <h1>Quase lá</h1>
+  <p>Clique para entrar no TeatNet neste aparelho.</p>
+  <form method="post" action="/entrar/{{.Data.Token}}" class="form">
+    <input type="hidden" name="volta" value="{{.Data.Volta}}">
+    <button class="btn btn-primary btn-block" type="submit">Entrar</button>
+  </form>
+</section>
+{{end}}

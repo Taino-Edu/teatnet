@@ -1,0 +1,49 @@
+{{define "content"}}
+{{$u := .User}}
+<section class="wrap">
+  <header class="dash-head">
+    <div>
+      <p class="eyebrow">Meu painel{{if $u.Verified}} · <span class="verified">✓ verificado</span>{{end}}</p>
+      <h1>{{if $u.Name}}{{$u.Name}}{{else}}{{$u.Email}}{{end}}</h1>
+      <p class="links">
+        {{if $u.Slug}}<a href="/artista/{{$u.Slug}}">Ver minha página pública</a> ·{{end}}
+        <a href="/painel/perfil">Editar perfil</a>
+        {{if $u.IsMod}}· <a href="/moderacao/metricas">Métricas</a> · <a href="/moderacao/espacos">Espaços</a>{{end}}
+        {{if $u.IsAdmin}}· <a href="/admin/usuarios">Usuários</a>{{end}}
+      </p>
+    </div>
+    <form method="post" action="/sair"><button class="btn btn-ghost" type="submit">Sair</button></form>
+  </header>
+
+  <div class="stats">
+    <div class="stat"><b>{{len .Data.Events}}</b><span>eventos enviados</span></div>
+    <div class="stat"><b>{{.Data.Views}}</b><span>visualizações</span></div>
+    <div class="stat"><b>{{.Data.Directions}}</b><span>pedidos de rota</span></div>
+  </div>
+
+  <div class="section-head">
+    <h2>Meus eventos</h2>
+    <a class="btn btn-primary" href="/eventos/novo">+ Novo evento</a>
+  </div>
+  {{if .Data.Events}}
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Evento</th><th>Datas</th><th>Situação</th><th class="num">Visitas</th><th></th></tr></thead>
+      <tbody>
+      {{range .Data.Events}}
+        <tr>
+          <td><a href="/evento/{{.Slug}}">{{.Title}}</a><br><small class="muted">{{.PlaceName}}</small></td>
+          <td>{{rangeOf .First .Last}}{{if gt .SessionCount 1}}<br><small class="muted">{{.SessionCount}} sessões</small>{{end}}</td>
+          <td>{{template "status" .Status}}{{with .ReviewNote}}<br><small class="muted">{{.}}</small>{{end}}</td>
+          <td class="num">{{.Views}}</td>
+          <td><a href="/eventos/{{.ID}}/editar">Editar</a></td>
+        </tr>
+      {{end}}
+      </tbody>
+    </table>
+  </div>
+  {{else}}
+  <p class="empty">Você ainda não divulgou nenhum evento. <a href="/eventos/novo">Comece agora</a>.</p>
+  {{end}}
+</section>
+{{end}}

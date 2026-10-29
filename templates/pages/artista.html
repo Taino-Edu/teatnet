@@ -1,0 +1,19 @@
+{{define "content"}}
+{{$p := .Data.Profile}}
+<section class="profile wrap">
+  <header class="profile-head">
+    {{if $p.Avatar}}<img class="avatar" src="{{$p.Avatar}}" alt="">{{else}}<div class="avatar avatar-empty" aria-hidden="true">{{initial $p.Name}}</div>{{end}}
+    <div>
+      <p class="eyebrow">{{if eq $p.Kind "espaco"}}Espaço cultural{{else}}Artista / grupo{{end}}{{if $p.Verified}} · <span class="verified">✓ verificado</span>{{end}}</p>
+      <h1>{{$p.Name}}</h1>
+      <p class="links">
+        {{with $p.Instagram}}<a href="{{instagramURL .}}" target="_blank" rel="noopener">@{{.}}</a>{{end}}
+        {{with $p.Website}}<a href="{{.}}" target="_blank" rel="noopener">{{.}}</a>{{end}}
+      </p>
+    </div>
+  </header>
+  {{with $p.Bio}}<div class="about">{{range paragraphs .}}<p>{{.}}</p>{{end}}</div>{{end}}
+  <h2>Próximos eventos</h2>
+  {{template "card-list" .Data.Cards}}
+</section>
+{{end}}

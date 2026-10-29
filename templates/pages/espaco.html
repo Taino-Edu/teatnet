@@ -1,0 +1,23 @@
+{{define "head"}}{{template "leaflet"}}{{end}}
+
+{{define "content"}}
+{{$v := .Data.Venue}}
+<section class="profile wrap">
+  <div class="event-grid">
+    <div>
+      <p class="eyebrow">Espaço cultural{{with $v.Neighborhood}} · {{.}}{{end}}</p>
+      <h1>{{$v.Name}}</h1>
+      <p class="event-place">{{$v.Address}}</p>
+      {{with access $v.Accessibility}}<p class="muted">Acessibilidade: {{range $i, $a := .}}{{if $i}}, {{end}}{{$a}}{{end}}</p>{{end}}
+      {{with $v.Website}}<p><a href="{{.}}" target="_blank" rel="noopener">{{.}}</a></p>{{end}}
+      <h2>Agenda</h2>
+      {{template "card-list" .Data.Cards}}
+    </div>
+    <aside class="event-side">
+      <div id="minimap" class="minimap" data-lat="{{$v.Lat}}" data-lng="{{$v.Lng}}" data-category="teatro"></div>
+    </aside>
+  </div>
+</section>
+{{end}}
+
+{{define "scripts"}}<script src="/static/minimap.js?v={{.Version}}" defer></script>{{end}}

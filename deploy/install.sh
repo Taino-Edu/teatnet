@@ -36,10 +36,11 @@ sudo -u teatnet bash -c "set -a; . $APP/teatnet.env; $APP/teatnet -seed $SRC/see
 
 if ! grep -q "teatnet.tainodev.com.br" /etc/caddy/Caddyfile; then
   echo "==> caddy"
+  # monta a configuração nova ao lado e só troca o arquivo se ela for válida
+  { cat /etc/caddy/Caddyfile; printf '\n'; cat deploy/Caddyfile; } > /etc/caddy/Caddyfile.teatnet
+  caddy validate --config /etc/caddy/Caddyfile.teatnet --adapter caddyfile
   cp /etc/caddy/Caddyfile "/etc/caddy/Caddyfile.bak-$(date +%Y%m%d%H%M%S)"
-  printf '\n' >> /etc/caddy/Caddyfile
-  cat deploy/Caddyfile >> /etc/caddy/Caddyfile
-  caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
+  mv /etc/caddy/Caddyfile.teatnet /etc/caddy/Caddyfile
   systemctl reload caddy
 fi
 

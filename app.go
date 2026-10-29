@@ -322,9 +322,9 @@ func (n noDirListing) Open(name string) (http.File, error) {
 }
 
 // clientIP devolve o IP usado nos limites de requisição. O CF-Connecting-IP só é confiável
-// porque, na VPS, o app escuta em 127.0.0.1 atrás do Caddy e o ufw só libera a 443 para os
-// IPs da Cloudflare, que sempre sobrescreve esse cabeçalho. Sem esse firewall, não ligue
-// TEATNET_BEHIND_CF: qualquer um poderia inventar o cabeçalho e escapar dos limites.
+// porque, na VPS, o app escuta em 127.0.0.1 atrás do Caddy, que só confia nos IPs da
+// Cloudflare e reescreve esse cabeçalho com o IP validado (deploy/Caddyfile). Sem um proxy
+// assim, não ligue TEATNET_BEHIND_CF: qualquer um poderia inventar o cabeçalho.
 func (a *App) clientIP(r *http.Request) string {
 	if a.cfg.BehindCF {
 		if ip := r.Header.Get("CF-Connecting-IP"); ip != "" {

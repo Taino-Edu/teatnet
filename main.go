@@ -42,6 +42,7 @@ func env(key, def string) string {
 func main() {
 	seed := flag.String("seed", "", "carrega um arquivo .sql de dados iniciais e sai")
 	dev := flag.Bool("dev", false, "modo desenvolvimento: mostra o link de login na tela e admin@teatnet.test vira admin")
+	testMail := flag.String("testmail", "", "envia um e-mail de teste para este endereço com o SMTP configurado e sai")
 	flag.Parse()
 
 	port := env("PORT", "8080")
@@ -65,6 +66,18 @@ func main() {
 		if cfg.AdminEmail == "" {
 			cfg.AdminEmail = "admin@teatnet.test"
 		}
+	}
+
+	if *testMail != "" {
+		if cfg.SMTPHost == "" {
+			log.Fatal("SMTP não configurado (TEATNET_SMTP_HOST vazio)")
+		}
+		err := newMailer(cfg).Send(*testMail, "Teste do TeatNet", "Se você recebeu esta mensagem, o envio de e-mail do TeatNet está funcionando.\n\n"+cfg.BaseURL)
+		if err != nil {
+			log.Fatal("falha no envio: ", err)
+		}
+		log.Printf("e-mail de teste enviado para %s", *testMail)
+		return
 	}
 
 	if err := os.MkdirAll(filepath.Join(cfg.DataDir, "uploads"), 0o755); err != nil {

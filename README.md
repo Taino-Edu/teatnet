@@ -42,11 +42,11 @@ TEATNET_ADMIN_EMAIL=voce@exemplo.com bash /opt/teatnet-src/deploy/install.sh
 
 O script compila, instala o serviço systemd (`teatnet`, porta 8091), carrega os eventos iniciais e
 acrescenta o subdomínio ao Caddy usando o certificado de origem da Cloudflare. Para atualizar, rode-o de novo.
-As variáveis ficam em `/opt/teatnet/teatnet.env` (modelo em `deploy/teatnet.env.example`).
+As variáveis ficam em `/etc/teatnet/teatnet.env` (modelo em `deploy/teatnet.env.example`).
 Sem SMTP configurado, os links de login aparecem em `journalctl -u teatnet`.
 
 E-mail (Brevo) e captcha (Turnstile): `bash /opt/teatnet-src/deploy/configure.sh` pergunta as chaves,
-grava no `.env`, reinicia o serviço e manda um e-mail de teste (`teatnet -testmail voce@exemplo.com`).
+grava em `/etc/teatnet/teatnet.env`, reinicia o serviço e manda um e-mail de teste (`teatnet -testmail voce@exemplo.com`).
 Backup: copiar `data/teatnet.db` com `sqlite3 data/teatnet.db ".backup backup.db"` e a pasta `data/uploads`.
 
 | Variável | Para quê |

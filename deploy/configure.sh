@@ -3,19 +3,27 @@
 # Rodar como root na VPS:
 #   bash /opt/teatnet-src/deploy/configure.sh
 # Pergunta cada valor (Enter mantém o atual; as chaves secretas não aparecem na tela),
-# grava em /opt/teatnet/teatnet.env, reinicia o serviço e manda um e-mail de teste.
+# grava em /etc/teatnet/teatnet.env, reinicia o serviço e manda um e-mail de teste.
 set -euo pipefail
 
 APP=/opt/teatnet
-ENV=$APP/teatnet.env
+CONF=/etc/teatnet
+ENV=$CONF/teatnet.env
 [ -f "$ENV" ] || { echo "Rode antes o deploy/install.sh"; exit 1; }
+# /etc/teatnet é de root; mesmo assim, não seguimos links simbólicos.
+[ -L "$ENV" ] && { echo "$ENV é um link simbólico; abortando"; exit 1; }
+[ "$(stat -c %U "$CONF")" = root ] || { echo "$CONF precisa ser de root"; exit 1; }
 
 current() { grep -m1 "^$1=" "$ENV" | cut -d= -f2- || true; }
 
 set_var() {
-  grep -v "^$1=" "$ENV" > "$ENV.tmp" || true
-  printf '%s=%s\n' "$1" "$2" >> "$ENV.tmp"
-  mv "$ENV.tmp" "$ENV"
+  local tmp
+  tmp=$(mktemp "$CONF/.env.XXXXXX")
+  grep -v "^$1=" "$ENV" > "$tmp" || true
+  printf '%s=%s\n' "$1" "$2" >> "$tmp"
+  chown root:teatnet "$tmp"
+  chmod 640 "$tmp"
+  mv -f "$tmp" "$ENV"
 }
 
 ask() { # ask VAR "pergunta" [padrão]
@@ -46,8 +54,6 @@ echo "== Captcha (Cloudflare > Turnstile > TeatNet) =="
 ask        TEATNET_TURNSTILE_SITE "Site key"
 ask_secret TEATNET_TURNSTILE_SECRET "Secret key"
 
-chmod 600 "$ENV"
-chown teatnet:teatnet "$ENV"
 systemctl restart teatnet
 sleep 1
 systemctl is-active --quiet teatnet && echo "Serviço reiniciado."

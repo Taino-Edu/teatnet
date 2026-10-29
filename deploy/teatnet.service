@@ -6,7 +6,7 @@ After=network.target
 User=teatnet
 WorkingDirectory=/opt/teatnet
 ExecStart=/opt/teatnet/teatnet
-EnvironmentFile=/opt/teatnet/teatnet.env
+EnvironmentFile=/etc/teatnet/teatnet.env
 Restart=always
 RestartSec=2
 # limites para não disputar a VPS de 2 núcleos com o resto

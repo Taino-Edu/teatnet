@@ -25,8 +25,12 @@ fi
 id teatnet >/dev/null 2>&1 || useradd --system --home-dir "$APP" --shell /usr/sbin/nologin teatnet
 
 install -d -o root -g root -m 755 "$APP"
-install -d -o teatnet -g teatnet -m 750 "$APP/data" "$APP/data/uploads"
 install -d -o root -g teatnet -m 750 "$CONF"
+# data/ é do usuário do serviço: root só a cria (dentro de /opt/teatnet, que é de root) e
+# nunca mexe no que está dentro dela; a pasta de uploads é criada pelo próprio usuário.
+[ -L "$APP/data" ] && { echo "$APP/data é um link simbólico; abortando"; exit 1; }
+[ -e "$APP/data" ] || install -d -o teatnet -g teatnet -m 750 "$APP/data"
+sudo -u teatnet mkdir -p "$APP/data/uploads"
 
 # Instalações antigas guardavam o .env dentro de /opt/teatnet: move para /etc/teatnet.
 if [ ! -e "$ENV" ] && [ -f "$APP/teatnet.env" ] && [ ! -L "$APP/teatnet.env" ]; then

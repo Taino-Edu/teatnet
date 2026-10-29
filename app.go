@@ -321,6 +321,10 @@ func (n noDirListing) Open(name string) (http.File, error) {
 	return f, nil
 }
 
+// clientIP devolve o IP usado nos limites de requisição. O CF-Connecting-IP só é confiável
+// porque, na VPS, o app escuta em 127.0.0.1 atrás do Caddy e o ufw só libera a 443 para os
+// IPs da Cloudflare, que sempre sobrescreve esse cabeçalho. Sem esse firewall, não ligue
+// TEATNET_BEHIND_CF: qualquer um poderia inventar o cabeçalho e escapar dos limites.
 func (a *App) clientIP(r *http.Request) string {
 	if a.cfg.BehindCF {
 		if ip := r.Header.Get("CF-Connecting-IP"); ip != "" {
@@ -359,11 +363,23 @@ func excerpt(s string, n int) string {
 }
 
 // safeRedirect só aceita caminhos internos, para o ?volta= não virar redirecionamento aberto.
+// Recusa barra invertida, espaços e caracteres de controle (navegadores tratam "/\x" e
+// "/%09/x" como outro domínio) e qualquer coisa que o url.Parse leia com esquema ou host.
 func safeRedirect(p string) string {
-	if strings.HasPrefix(p, "/") && !strings.HasPrefix(p, "//") && !strings.HasPrefix(p, "/\\") {
-		return p
+	const fallback = "/painel"
+	if !strings.HasPrefix(p, "/") || strings.HasPrefix(p, "//") || len(p) > 300 {
+		return fallback
 	}
-	return "/painel"
+	for _, r := range p {
+		if r <= ' ' || r == '\\' || r == 0x7f {
+			return fallback
+		}
+	}
+	u, err := url.Parse(p)
+	if err != nil || u.Scheme != "" || u.Host != "" || u.User != nil || !strings.HasPrefix(u.Path, "/") || strings.HasPrefix(u.Path, "//") {
+		return fallback
+	}
+	return p
 }
 
 func (a *App) housekeeping(ctx context.Context) {

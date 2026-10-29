@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"net/mail"
+	"net/url"
 	"strings"
 	"time"
 )
@@ -61,7 +62,7 @@ func (a *App) loginSend(w http.ResponseWriter, r *http.Request) {
 	}
 	link := a.cfg.BaseURL + "/entrar/" + token
 	if volta != "" {
-		link += "?volta=" + safeRedirect(volta)
+		link += "?volta=" + url.QueryEscape(safeRedirect(volta))
 	}
 	body := "Olá!\n\nPara entrar no TeatNet, abra o link abaixo (vale por 20 minutos e só funciona uma vez):\n\n" +
 		link + "\n\nSe não foi você que pediu, é só ignorar este e-mail.\n\nTeatNet · cultura em Rio Preto"
